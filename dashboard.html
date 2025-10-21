@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ed-Vantage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #cbb8b8;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            margin-top: 0;
+            color: #555;
+            font-size: 18px;
+        }
+        
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .score.high { color: #4CAF50; }
+        .score.medium { color: #FF9800; }
+        .score.low { color: #F44336; }
+        
+        .metric {
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .nudge {
+            grid-column: 1 / -1;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            font-size: 18px;
+        }
+        
+        .nudge.critical {
+            background: #f8d7da;
+            border-left-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Ed-Vantage - Live Classroom Level Interaction Provider </h1>
+    
+    <div class="dashboard">
+        <div class="card">
+            <h2>Engagement Score</h2>
+            <div class="score" id="score">--</div>
+        </div>
+        
+        <div class="card">
+            <h2>Classroom Emotion</h2>
+            <div class="metric" id="emotion">--</div>
+        </div>
+        
+        <div class="card">
+            <h2>Audio Activity</h2>
+            <div class="metric" id="audio">--</div>
+        </div>
+        
+        <div class="card">
+            <h2>Last Updated</h2>
+            <div class="metric" id="timestamp">--</div>
+        </div>
+        
+        <div class="card nudge" id="nudge-card">
+            <h2>💡 AI Suggestion</h2>
+            <p id="nudge">Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        function updateDashboard() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+        
+                    const scoreEl = document.getElementById('score');
+                    scoreEl.textContent = data.engagement_score + '%';
+                    scoreEl.className = 'score';
+                    
+                    if (data.engagement_score >= 70) {
+                        scoreEl.classList.add('high');
+                    } else if (data.engagement_score >= 50) {
+                        scoreEl.classList.add('medium');
+                    } else {
+                        scoreEl.classList.add('low');
+                    }
+                    
+           
+                    document.getElementById('emotion').textContent = 
+                        data.emotion.toUpperCase();
+                    document.getElementById('audio').textContent = 
+                        data.audio_state.toUpperCase();
+                    
+                   
+                    const now = new Date();
+                    document.getElementById('timestamp').textContent = 
+                        now.toLocaleTimeString();
+                    
+                   
+                    document.getElementById('nudge').textContent = data.nudge;
+                    
+                   
+                    const nudgeCard = document.getElementById('nudge-card');
+                    if (data.engagement_score < 40) {
+                        nudgeCard.classList.add('critical');
+                    } else {
+                        nudgeCard.classList.remove('critical');
+                    }
+                });
+        }
+        
+
+        setInterval(updateDashboard, 5000);
+        updateDashboard();
+    </script>
+</body>
+</html>
