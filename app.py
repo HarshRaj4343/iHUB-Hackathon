@@ -13,6 +13,7 @@ dashboard_data = {
 data_lock = threading.Lock()
 
 def update_emotion_task():
+    """Continuously gets the classroom emotion and updates the shared data."""
     while True:
         emotion = get_classroom_emotion()  
         with data_lock:
@@ -20,6 +21,7 @@ def update_emotion_task():
         print(f"Updated emotion: {emotion}")
         time.sleep(1) 
 def update_audio_task():
+    """Continuously gets the audio state and updates the shared data."""
     while True:
         audio_state, _ = check_classroom_audio()
         with data_lock:
@@ -30,10 +32,15 @@ def update_audio_task():
 
 @app.route('/')
 def index():
+    """Serves the main dashboard page."""
     return render_template('dashboard.html')
 
 @app.route('/data')
 def get_data():
+    """
+    This endpoint is called by the frontend to get the latest data.
+    The scoring and nudge logic now happens here, on-demand.
+    """
     with data_lock:
         
         current_emotion = dashboard_data['emotion']
